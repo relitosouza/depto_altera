@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Automação Osasco</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body { 
+            background-color: #f0f2f5; 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        .main-card { 
+            width: 100%; 
+            max-width: 650px; 
+            border: none; 
+            border-radius: 15px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            overflow: hidden;
+        }
+        .header-bg {
+            background: linear-gradient(135deg, #0d6efd, #0043a8);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .nav-pills .nav-link {
+            color: #495057;
+            font-weight: 600;
+            margin-right: 5px;
+            border-radius: 8px;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+            box-shadow: 0 4px 6px rgba(13, 110, 253, 0.3);
+        }
+        .status-box { 
+            background: #e7f1ff; 
+            padding: 15px; 
+            border-radius: 10px; 
+            margin-top: 20px; 
+            text-align: center; 
+            font-weight: bold; 
+            color: #0043a8; 
+            display: none; 
+            border: 1px solid #b6d4fe;
+        }
+        .progress { height: 25px; margin-top: 15px; display: none; border-radius: 12px; }
+        
+        /* Estilo da área bloqueada (Em breve) */
+        .coming-soon-overlay {
+            position: relative;
+            opacity: 0.6;
+            pointer-events: none; /* Impede cliques */
+        }
+        .badge-soon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffc107;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10;
+            opacity: 1 !important; /* Garante que o texto fique visível */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card main-card">
+        <div class="header-bg">
+            <h2 class="mb-1"><i class="bi bi-robot"></i> Automação Financeira</h2>
+            <p class="mb-0 opacity-75">Prefeitura de Osasco</p>
+        </div>
+
+        <div class="card-body p-4">
+            
+            <ul class="nav nav-pills mb-4 nav-justified" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pills-credito-tab" data-bs-toggle="pill" data-bs-target="#pills-credito" type="button" role="tab">
+                        <i class="bi bi-cash-coin me-2"></i>Abertura de Crédito
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-orcamento-tab" data-bs-toggle="pill" data-bs-target="#pills-orcamento" type="button" role="tab">
+                        <i class="bi bi-arrow-left-right me-2"></i>Alteração Orçamentária
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="pills-tabContent">
+                
+                <div class="tab-pane fade show active" id="pills-credito" role="tabpanel">
+                    <div class="alert alert-light border text-center mb-3">
+                        <small class="text-muted"><i class="bi bi-info-circle"></i> Certifique-se de estar na tela de <b>Abertura de Crédito</b>.</small>
+                    </div>
+
+                    <form id="formUpload">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary">Arquivo de Importação (.xlsx)</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-white"><i class="bi bi-file-earmark-excel text-success"></i></span>
+                                <input class="form-control" type="file" id="arquivo" accept=".xlsx" required>
+                            </div>
+                        </div>
+                        <button type="button" onclick="iniciarRobo()" id="btnIniciar" class="btn btn-primary btn-lg w-100 shadow-sm py-3">
+                            <i class="bi bi-play-circle-fill me-2"></i>Iniciar Automação
+                        </button>
+                    </form>
+
+                    <div id="statusBox" class="status-box">
+                        <span id="txtStatus">Aguardando...</span>
+                        <div class="spinner-border spinner-border-sm ms-2" id="loadingIcon" role="status"></div>
+                    </div>
+
+                    <div class="progress" id="barraProgressoContainer">
+                        <div id="barraProgresso" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%">0%</div>
+                    </div>
+
+                    <a href="/download" id="btnDownload" class="btn btn-success w-100 mt-4 btn-lg shadow" style="display: none;">
+                        <i class="bi bi-download me-2"></i>Baixar Relatório Final
+                    </a>
+                </div>
+
+                <div class="tab-pane fade" id="pills-orcamento" role="tabpanel" style="position: relative;">
+                    
+                    <div class="badge-soon">
+                        <i class="bi bi-cone-striped me-2"></i>Liberado em Breve
+                    </div>
+
+                    <div class="coming-soon-overlay">
+                        <div class="alert alert-light border text-center mb-3">
+                            <small class="text-muted"><i class="bi bi-info-circle"></i> Tela de Inclusão de Alteração Orçamentária.</small>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary">Arquivo de Importação (.xlsx)</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light"><i class="bi bi-file-earmark-excel text-muted"></i></span>
+                                <input class="form-control" type="file" disabled placeholder="Bloqueado">
+                            </div>
+                        </div>
+                        <button disabled class="btn btn-secondary btn-lg w-100 py-3">
+                            <i class="bi bi-lock-fill me-2"></i>Iniciar Automação
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer bg-white text-center py-3">
+            <small class="text-muted">Desenvolvido para SMF Osasco v2.0</small>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let intervaloCheck;
+
+        function iniciarRobo() {
+            const arquivoInput = document.getElementById('arquivo');
+            if (arquivoInput.files.length === 0) {
+                alert("Por favor, selecione um arquivo!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('arquivo', arquivoInput.files[0]);
+
+            // Interface Visual
+            const btn = document.getElementById('btnIniciar');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Iniciando...';
+            
+            document.getElementById('statusBox').style.display = 'block';
+            document.getElementById('barraProgressoContainer').style.display = 'flex';
+            document.getElementById('btnDownload').style.display = 'none';
+            document.getElementById('barraProgresso').style.width = "0%";
+            document.getElementById('barraProgresso').innerText = "0%";
+
+            fetch('/iniciar', { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if(data.erro) {
+                    alert("Erro: " + data.erro);
+                    restaurarBotoes();
+                } else {
+                    intervaloCheck = setInterval(verificarStatus, 1000);
+                }
+            })
+            .catch(error => {
+                alert("Erro de conexão.");
+                console.error(error);
+                restaurarBotoes();
+            });
+        }
+
+        function verificarStatus() {
+            fetch('/status')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('txtStatus').innerText = data.mensagem;
+                
+                if (data.total > 0) {
+                    let porcentagem = Math.round((data.progresso / data.total) * 100);
+                    let barra = document.getElementById('barraProgresso');
+                    barra.style.width = porcentagem + "%";
+                    barra.innerText = porcentagem + "%";
+                    
+                    // Muda cor da barra se der erro
+                    if(data.mensagem.includes("Erro")) {
+                        barra.classList.remove('bg-success');
+                        barra.classList.add('bg-danger');
+                    } else {
+                        barra.classList.add('bg-success');
+                        barra.classList.remove('bg-danger');
+                    }
+                }
+
+                if (data.concluido) {
+                    clearInterval(intervaloCheck);
+                    document.getElementById('loadingIcon').style.display = 'none';
+                    if (data.sucesso) {
+                        document.getElementById('btnDownload').style.display = 'block';
+                    }
+                    restaurarBotoes();
+                }
+                
+                // Se o robô parou de rodar mas não concluiu (erro fatal)
+                if (!data.rodando && !data.concluido) {
+                    clearInterval(intervaloCheck);
+                    document.getElementById('loadingIcon').style.display = 'none';
+                    restaurarBotoes();
+                }
+            });
+        }
+
+        function restaurarBotoes() {
+            const btn = document.getElementById('btnIniciar');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i>Iniciar Novamente';
+        }
+    </script>
+</body>
+</html>
