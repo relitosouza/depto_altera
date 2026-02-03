@@ -1,0 +1,7 @@
+Flask
+pandas
+threading
+time
+playwright
+os
+gunicorn
